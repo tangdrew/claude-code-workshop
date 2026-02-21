@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to Claude Code</title>
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=cabinet-grotesk@500,700,800&display=swap">
+    <style>
+        /* ===========================================
+           CSS CUSTOM PROPERTIES (THEME)
+           Change these to restyle the entire deck
+           =========================================== */
+        :root {
+            /* Colors */
+            --bg-primary: #111111;
+            --bg-card: #1a1a1a;
+            --bg-card-hover: #222222;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.45);
+            --text-muted: rgba(255, 255, 255, 0.25);
+            --accent: #ff6b35;
+            --accent-secondary: #f7c948;
+            --accent-gradient: linear-gradient(135deg, #ff6b35 0%, #f7c948 100%);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-accent: rgba(255, 107, 53, 0.2);
+
+            /* Typography - responsive with clamp() */
+            --font-display: 'Cabinet Grotesk', sans-serif;
+            --font-body: 'General Sans', sans-serif;
+            --title-size: clamp(2rem, 5.5vw, 4rem);
+            --h2-size: clamp(1.5rem, 3.5vw, 2.75rem);
+            --h3-size: clamp(1.1rem, 2.2vw, 1.5rem);
+            --body-size: clamp(0.8rem, 1.3vw, 1.05rem);
+            --small-size: clamp(0.65rem, 1vw, 0.8rem);
+            --label-size: clamp(0.6rem, 0.9vw, 0.72rem);
+
+            /* Spacing */
+            --slide-padding: clamp(1.5rem, 4vw, 4rem);
+            --content-gap: clamp(0.75rem, 2vw, 1.75rem);
+            --element-gap: clamp(0.4rem, 1vw, 0.75rem);
+
+            /* Animation */
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration: 0.6s;
+        }
+
+        /* ===========================================
+           BASE & RESET
+           =========================================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            height: 100%;
+        }
+
+        /* ===========================================
+           SLIDE CONTAINER
+           Each slide = exact viewport height, no scrolling
+           =========================================== */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            padding: var(--slide-padding);
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            overflow: hidden;
+        }
+
+        /* ===========================================
+           BACKGROUND ELEMENTS
+           =========================================== */
+        .grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+
+        .glow {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(60px);
+        }
+
+        .glow-orange {
+            width: min(500px, 60vw);
+            height: min(500px, 60vw);
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
+        }
+
+        .glow-gold {
+            width: min(400px, 50vw);
+            height: min(400px, 50vw);
+            background: radial-gradient(circle, rgba(247, 201, 72, 0.07) 0%, transparent 70%);
+        }
+
+        /* ===========================================
+           TYPOGRAPHY
+           =========================================== */
+        h1 {
+            font-family: var(--font-display);
+            font-size: var(--title-size);
+            font-weight: 800;
+            line-height: 1.05;
+        }
+
+        h2 {
+            font-family: var(--font-display);
+            font-size: var(--h2-size);
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        h3 {
+            font-family: var(--font-display);
+            font-size: var(--h3-size);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .gradient-text {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: var(--label-size);
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid var(--border-accent);
+            padding: 6px 14px;
+            border-radius: 100px;
+        }
+
+        .badge-dot::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* ===========================================
+           CARD COMPONENTS
+           =========================================== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: clamp(1rem, 2.5vw, 2rem);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+            gap: clamp(0.5rem, 1.5vw, 1rem);
+        }
+
+        .card-sm {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: clamp(0.75rem, 1.5vw, 1.25rem);
+        }
+
+        .card-sm h3 {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            margin-bottom: var(--element-gap);
+        }
+
+        .card-sm p {
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* ===========================================
+           STEP ROWS
+           =========================================== */
+        .step-row {
+            display: flex;
+            align-items: flex-start;
+            gap: clamp(0.75rem, 2vw, 1.5rem);
+        }
+
+        .step-number {
+            flex-shrink: 0;
+            width: clamp(2rem, 3.5vw, 2.75rem);
+            height: clamp(2rem, 3.5vw, 2.75rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid var(--border-accent);
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: clamp(0.85rem, 1.5vw, 1.1rem);
+            color: var(--accent);
+        }
+
+        .step-body h3 {
+            margin-bottom: clamp(0.15rem, 0.5vw, 0.35rem);
+        }
+
+        .step-body p {
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        /* ===========================================
+           TIMELINE
+           =========================================== */
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.5rem, 1.2vh, 1rem);
+            position: relative;
+            padding-left: clamp(1rem, 2vw, 1.5rem);
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent), var(--accent-secondary));
+            border-radius: 1px;
+        }
+
+        .timeline-item {
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: calc(-1 * clamp(1rem, 2vw, 1.5rem) - 4px);
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg-primary);
+        }
+
+        .timeline-year {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.05em;
+        }
+
+        .timeline-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+        }
+
+        .timeline-desc {
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* ===========================================
+           TERMINAL BLOCK
+           =========================================== */
+        .terminal-block {
+            background: #0d0d0d;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.03);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: #ff5f57; }
+        .terminal-dot.yellow { background: #febc2e; }
+        .terminal-dot.green { background: #28c840; }
+
+        .terminal-body {
+            padding: clamp(0.75rem, 1.5vw, 1.25rem);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: clamp(0.65rem, 1vw, 0.8rem);
+            line-height: 1.6;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .terminal-body .prompt { color: var(--accent); }
+        .terminal-body .output { color: rgba(255,255,255,0.4); }
+
+        /* ===========================================
+           BLOCKQUOTE
+           =========================================== */
+        .quote-block {
+            border-left: 3px solid var(--accent);
+            padding-left: clamp(1rem, 2vw, 1.5rem);
+        }
+
+        .quote-block blockquote {
+            font-family: var(--font-display);
+            font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+            font-weight: 600;
+            line-height: 1.35;
+            color: var(--text-primary);
+            font-style: italic;
+        }
+
+        .quote-block cite {
+            display: block;
+            font-style: normal;
+            font-family: var(--font-body);
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            margin-top: clamp(0.3rem, 0.8vh, 0.6rem);
+        }
+
+        /* ===========================================
+           STAT / CALLOUT
+           =========================================== */
+        .stat-big {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            line-height: 1;
+        }
+
+        .callout {
+            background: rgba(255, 107, 53, 0.06);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 10px 10px 0;
+            padding: clamp(0.75rem, 1.5vw, 1.25rem);
+        }
+
+        .callout p {
+            font-size: var(--body-size);
+            color: rgba(255,255,255,0.7);
+            line-height: 1.5;
+        }
+
+        /* ===========================================
+           SLIDER TABLE (autonomy slider)
+           =========================================== */
+        .slider-row {
+            display: grid;
+            grid-template-columns: clamp(2rem, 4vw, 3rem) 1fr 1fr;
+            gap: clamp(0.4rem, 1vw, 0.75rem);
+            align-items: start;
+            padding: clamp(0.4rem, 0.8vh, 0.6rem) 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .slider-row:last-child { border-bottom: none; }
+
+        .slider-level {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+            color: var(--accent);
+        }
+
+        .slider-label {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+        }
+
+        .slider-desc {
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            line-height: 1.35;
+        }
+
+        .slider-example {
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            line-height: 1.35;
+        }
+
+        /* ===========================================
+           LIST STYLES
+           =========================================== */
+        .bullet-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.35rem, 0.8vh, 0.65rem);
+        }
+
+        .bullet-list li {
+            font-size: var(--body-size);
+            color: rgba(255,255,255,0.7);
+            line-height: 1.45;
+            padding-left: 1.2em;
+            position: relative;
+        }
+
+        .bullet-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.55em;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        /* ===========================================
+           SECTION LABEL
+           =========================================== */
+        .section-label {
+            font-size: var(--label-size);
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: clamp(0.4rem, 1vh, 0.75rem);
+        }
+
+        /* ===========================================
+           LAYOUT HELPERS
+           =========================================== */
+        .centered {
+            text-align: center;
+            align-items: center;
+        }
+
+        .max-w-narrow {
+            max-width: min(90vw, 600px);
+            margin: 0 auto;
+        }
+
+        .max-w-wide {
+            max-width: min(92vw, 900px);
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(1rem, 2.5vw, 2rem);
+            align-items: start;
+        }
+
+        @media (max-width: 700px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+
+        /* ===========================================
+           PROGRESS BAR
+           =========================================== */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent-gradient);
+            z-index: 100;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* ===========================================
+           NAV DOTS
+           =========================================== */
+        .nav-dots {
+            position: fixed;
+            right: clamp(0.75rem, 2vw, 1.5rem);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0;
+        }
+
+        .nav-dot.active {
+            background: var(--accent);
+            transform: scale(1.3);
+        }
+
+        .nav-dot:hover { background: rgba(255,255,255,0.3); }
+
+        /* ===========================================
+           KEYBOARD HINT
+           =========================================== */
+        .keyboard-hint {
+            position: fixed;
+            bottom: clamp(0.75rem, 2vh, 1.25rem);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            transition: opacity 0.5s ease;
+        }
+
+        /* ===========================================
+           REVEAL ANIMATIONS
+           =========================================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(25px);
+            transition: opacity var(--duration) var(--ease-out-expo),
+                        transform var(--duration) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
+        .slide.visible .reveal:nth-child(2) { transition-delay: 0.12s; }
+        .slide.visible .reveal:nth-child(3) { transition-delay: 0.19s; }
+        .slide.visible .reveal:nth-child(4) { transition-delay: 0.26s; }
+        .slide.visible .reveal:nth-child(5) { transition-delay: 0.33s; }
+        .slide.visible .reveal:nth-child(6) { transition-delay: 0.40s; }
+        .slide.visible .reveal:nth-child(7) { transition-delay: 0.47s; }
+        .slide.visible .reveal:nth-child(8) { transition-delay: 0.54s; }
+
+        .reveal-scale {
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity var(--duration) var(--ease-out-expo),
+                        transform var(--duration) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal-scale {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* ===========================================
+           RESPONSIVE BREAKPOINTS
+           =========================================== */
+        @media (max-height: 700px) {
+            :root {
+                --slide-padding: clamp(1rem, 3vw, 2.5rem);
+                --content-gap: clamp(0.5rem, 1.5vw, 1rem);
+                --title-size: clamp(1.5rem, 5vw, 3rem);
+                --h2-size: clamp(1.25rem, 3vw, 2rem);
+            }
+        }
+
+        @media (max-height: 600px) {
+            :root {
+                --slide-padding: clamp(0.75rem, 2.5vw, 1.75rem);
+                --content-gap: clamp(0.4rem, 1vw, 0.75rem);
+                --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+                --h2-size: clamp(1rem, 2.5vw, 1.75rem);
+                --body-size: clamp(0.7rem, 1.1vw, 0.9rem);
+            }
+            .nav-dots, .keyboard-hint { display: none; }
+        }
+
+        @media (max-height: 500px) {
+            :root {
+                --slide-padding: clamp(0.5rem, 2vw, 1.25rem);
+                --title-size: clamp(1.1rem, 4vw, 2rem);
+                --h2-size: clamp(0.95rem, 2.2vw, 1.5rem);
+                --body-size: clamp(0.65rem, 1vw, 0.85rem);
+            }
+        }
+
+        @media (max-width: 600px) {
+            :root { --title-size: clamp(1.5rem, 8vw, 3rem); }
+            .card-grid { grid-template-columns: 1fr; }
+            .slider-row { grid-template-columns: clamp(2rem, 4vw, 3rem) 1fr; }
+            .slider-example { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+            html { scroll-behavior: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Navigation Dots -->
+<nav class="nav-dots" id="navDots"></nav>
+
+<!-- Keyboard hint -->
+<div class="keyboard-hint" id="keyboardHint">Arrow keys or scroll to navigate</div>
+
+
+<!-- ============================================
+     SLIDE 1: TITLE
+     ============================================ -->
+<section class="slide centered" data-section="intro">
+    <div class="grid-bg"></div>
+    <div class="glow glow-orange" style="top: 15%; left: 45%; transform: translateX(-50%);"></div>
+    <div class="slide-content centered">
+        <div class="max-w-narrow" style="display: flex; flex-direction: column; align-items: center; gap: var(--content-gap);">
+            <div class="badge badge-dot reveal">Live Workshop</div>
+            <h1 class="reveal">Introduction to <span class="gradient-text">Claude Code</span></h1>
+            <p class="reveal" style="font-size: var(--body-size); color: var(--text-secondary); max-width: 420px; line-height: 1.5;">What AI agents are, why they matter, and hands-on experience with one</p>
+            <p class="reveal" style="font-size: var(--small-size); color: var(--text-muted); margin-top: var(--element-gap);">~2 Hours &middot; Interactive &middot; No Coding Required</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 2: AGENDA
+     ============================================ -->
+<section class="slide" data-section="intro">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">Today's Plan</div>
+                <h2>What We'll Cover</h2>
+            </div>
+            <div class="card-grid reveal-scale" style="margin-top: var(--element-gap);">
+                <div class="card-sm">
+                    <h3><span class="gradient-text">01</span> &nbsp;The Story</h3>
+                    <p>AI history, what agents are, the autonomy slider, and why this matters beyond coding. ~40 min.</p>
+                </div>
+                <div class="card-sm">
+                    <h3><span class="gradient-text">02</span> &nbsp;The Exercise</h3>
+                    <p>Hands-on with Claude Code &mdash; sales data analysis from messy CSV to polished report. ~60 min.</p>
+                </div>
+                <div class="card-sm">
+                    <h3><span class="gradient-text">03</span> &nbsp;Wrap-Up</h3>
+                    <p>Reflection, discussion, and what to do next. ~15 min.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 3: PART 1 SECTION BREAK
+     ============================================ -->
+<section class="slide centered" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="glow glow-orange" style="top: 30%; left: 50%; transform: translateX(-50%);"></div>
+    <div class="slide-content centered">
+        <div class="max-w-narrow" style="display: flex; flex-direction: column; align-items: center; gap: var(--content-gap);">
+            <div class="badge reveal">Part 1</div>
+            <h1 class="reveal">The <span class="gradient-text">Story</span></h1>
+            <p class="reveal" style="font-size: var(--body-size); color: var(--text-secondary);">How we got from chatbots to AI agents</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 4: 3-MINUTE HISTORY
+     ============================================ -->
+<section class="slide" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">1A: Quick History</div>
+                <h2>Setting the Timeline</h2>
+            </div>
+            <div class="timeline reveal">
+                <div class="timeline-item">
+                    <div class="timeline-year">2020&ndash;2021</div>
+                    <div class="timeline-title">LLMs exist, only devs touch them</div>
+                    <div class="timeline-desc">GitHub Copilot launches as "autocomplete for code." Powerful but invisible to most people.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">Nov 2022</div>
+                    <div class="timeline-title">ChatGPT drops</div>
+                    <div class="timeline-desc">Suddenly everyone can talk to AI. But it's still a chat window &mdash; ask, get answer, copy-paste.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2023&ndash;2024</div>
+                    <div class="timeline-title">Tons of tools show up</div>
+                    <div class="timeline-desc">Cursor, Devin, image generators, reasoning models. Things move fast.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2025&ndash;Now</div>
+                    <div class="timeline-title">The shift to agents</div>
+                    <div class="timeline-desc">AI goes from answering questions to actually doing things. Karpathy coins "vibe coding." Claude Code launches.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- ============================================
+     SLIDE 6: WHAT IS AN AGENT?
+     ============================================ -->
+<section class="slide" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">1B: Core Concept</div>
+                <h2>What Is an Agent?</h2>
+            </div>
+            <div class="quote-block reveal">
+                <blockquote>"An agent is an LLM that runs tools in a loop to achieve a goal."</blockquote>
+                <cite>&mdash; Simon Willison</cite>
+            </div>
+            <div class="card-grid reveal" style="margin-top: var(--element-gap);">
+                <div class="card-sm">
+                    <h3><span class="gradient-text">Tools</span></h3>
+                    <p>It can do things &mdash; read files, run code, browse the web &mdash; not just generate text</p>
+                </div>
+                <div class="card-sm">
+                    <h3><span class="gradient-text">A Loop</span></h3>
+                    <p>It tries something, sees the result, decides what to do next, and keeps going</p>
+                </div>
+                <div class="card-sm">
+                    <h3><span class="gradient-text">A Goal</span></h3>
+                    <p>It's working toward an outcome, not just responding to your last message</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 7: RESTAURANT ANALOGY
+     ============================================ -->
+<section class="slide" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">Making It Click</div>
+                <h2>The Restaurant Analogy</h2>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: clamp(0.4rem, 1vh, 0.75rem); margin-top: var(--element-gap);">
+                <div class="step-row reveal">
+                    <div class="step-number" style="background: rgba(255,255,255,0.05); border-color: var(--border); color: var(--text-secondary);">1</div>
+                    <div class="step-body">
+                        <h3>Chatbot = Vending Machine</h3>
+                        <p>Push button, get fixed item. No flexibility.</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number" style="background: rgba(255,255,255,0.05); border-color: var(--border); color: var(--text-secondary);">2</div>
+                    <div class="step-body">
+                        <h3>Assistant = Waiter</h3>
+                        <p>You tell them what you want, they relay it. Still following a script.</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number">3</div>
+                    <div class="step-body">
+                        <h3>Agent = Personal Chef</h3>
+                        <p>You say "I'm in the mood for Italian." They check what's available, pick a recipe, cook it, taste it, adjust seasoning, and serve. If they're missing an ingredient, they substitute &mdash; without asking you.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="callout reveal">
+                <p><strong>The test:</strong> Can you give it a task and walk away? If yes, it's an agent.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 8: AUTONOMY SLIDER INTRO
+     ============================================ -->
+<section class="slide centered" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="glow glow-orange" style="top: 30%; left: 50%; transform: translateX(-50%);"></div>
+    <div class="slide-content centered">
+        <div class="max-w-narrow" style="display: flex; flex-direction: column; align-items: center; gap: var(--content-gap);">
+            <div class="badge reveal">1C: Key Framework</div>
+            <h2 class="reveal">The <span class="gradient-text">Autonomy Slider</span></h2>
+            <p class="reveal" style="font-size: var(--body-size); color: var(--text-secondary); max-width: 480px; line-height: 1.6;">Products shouldn't offer a binary "AI on/off." They should offer a slider from full human control to full AI autonomy.</p>
+            <p class="reveal" style="font-size: var(--small-size); color: var(--text-muted); max-width: 400px; line-height: 1.5;">Like Tesla Autopilot &mdash; lane-keeping, then adaptive cruise, then lane changes. Users build trust gradually.</p>
+            <p class="reveal" style="font-size: var(--label-size); color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;">&mdash; Andrej Karpathy</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 9: SLIDER LEVELS 1-3
+     ============================================ -->
+<section class="slide" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">The Autonomy Slider</div>
+                <h2>Levels 1&ndash;3: Human Drives</h2>
+            </div>
+            <div style="display: flex; flex-direction: column; margin-top: var(--element-gap);" class="reveal">
+                <div class="slider-row">
+                    <div class="slider-level">1</div>
+                    <div>
+                        <div class="slider-label">Suggestion</div>
+                        <div class="slider-desc">AI predicts your next action, you accept or reject</div>
+                    </div>
+                    <div class="slider-example">Copilot autocomplete, spell check</div>
+                </div>
+                <div class="slider-row">
+                    <div class="slider-level">2</div>
+                    <div>
+                        <div class="slider-label">Conversation</div>
+                        <div class="slider-desc">You describe what you want, AI generates it, you paste it in</div>
+                    </div>
+                    <div class="slider-example">ChatGPT, Claude chat</div>
+                </div>
+                <div class="slider-row">
+                    <div class="slider-level">3</div>
+                    <div>
+                        <div class="slider-label">Integrated Partner</div>
+                        <div class="slider-desc">AI edits your work directly, you review each change</div>
+                    </div>
+                    <div class="slider-example">Cursor, Microsoft 365 Copilot</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 10: SLIDER LEVELS 4-6
+     ============================================ -->
+<section class="slide" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">The Autonomy Slider</div>
+                <h2>Levels 4&ndash;6: <span class="gradient-text">AI Drives</span></h2>
+            </div>
+            <div style="display: flex; flex-direction: column; margin-top: var(--element-gap);" class="reveal">
+                <div class="slider-row">
+                    <div class="slider-level">4</div>
+                    <div>
+                        <div class="slider-label">Supervised Agent</div>
+                        <div class="slider-desc">AI plans and executes multi-step work, asks permission at key moments</div>
+                    </div>
+                    <div class="slider-example">Claude Code &larr; <strong style="color: var(--accent);">we are here</strong></div>
+                </div>
+                <div class="slider-row">
+                    <div class="slider-level">5</div>
+                    <div>
+                        <div class="slider-label">Autonomous Agent</div>
+                        <div class="slider-desc">AI works independently, comes back with results</div>
+                    </div>
+                    <div class="slider-example">Devin, OpenAI Codex, background agents</div>
+                </div>
+                <div class="slider-row">
+                    <div class="slider-level">6</div>
+                    <div>
+                        <div class="slider-label">Proactive Agent</div>
+                        <div class="slider-desc">AI notices things to do and acts without being asked</div>
+                    </div>
+                    <div class="slider-example">Scheduled agents, monitoring agents</div>
+                </div>
+            </div>
+            <div class="callout reveal">
+                <p>The slider isn't about maximizing autonomy &mdash; it's about finding the <strong>right level</strong> for each task.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 11: KEY TRANSITIONS
+     ============================================ -->
+<section class="slide" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">Why Each Step Matters</div>
+                <h2>The Transitions</h2>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: clamp(0.3rem, 0.7vh, 0.55rem); margin-top: var(--element-gap);">
+                <div class="step-row reveal">
+                    <div class="step-number">1&rarr;2</div>
+                    <div class="step-body">
+                        <h3>Suggestion &rarr; Conversation</h3>
+                        <p>"Instead of guessing what I'll type, I can just describe what I want." Non-technical people get access.</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number">2&rarr;3</div>
+                    <div class="step-body">
+                        <h3>Conversation &rarr; Integrated Partner</h3>
+                        <p>"Instead of copy-pasting from a chat window, the AI edits my actual files."</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number">3&rarr;4</div>
+                    <div class="step-body">
+                        <h3>Integrated Partner &rarr; Supervised Agent</h3>
+                        <p>"I describe the goal and it figures out the steps." The AI starts planning. This is the big jump.</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number">4&rarr;5</div>
+                    <div class="step-body">
+                        <h3>Supervised &rarr; Autonomous</h3>
+                        <p>"I kick off a task and close my laptop. It keeps working."</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number">5&rarr;6</div>
+                    <div class="step-body">
+                        <h3>Autonomous &rarr; Proactive</h3>
+                        <p>"I didn't ask it to do anything. It noticed something needed doing and did it."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 12: KARPATHY INSIGHT
+     ============================================ -->
+<section class="slide centered" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="glow glow-gold" style="top: 25%; left: 50%; transform: translateX(-50%);"></div>
+    <div class="slide-content centered">
+        <div class="max-w-narrow" style="display: flex; flex-direction: column; align-items: center; gap: var(--content-gap);">
+            <div class="badge reveal">Karpathy's Insight</div>
+            <h2 class="reveal" style="font-size: var(--h2-size);">We're NOT at full autonomy yet. <span class="gradient-text">And that's fine.</span></h2>
+            <p class="reveal" style="font-size: var(--body-size); color: var(--text-secondary); max-width: 480px; line-height: 1.6;">The most useful products right now are partial autonomy &mdash; you stay in the loop. The slider lets you ratchet up trust over time.</p>
+            <div class="card reveal" style="margin-top: var(--element-gap); padding: clamp(0.75rem, 1.5vw, 1.25rem); text-align: center;">
+                <p style="font-size: var(--body-size); color: rgba(255,255,255,0.7);"><em>"Demo is <code style="color: var(--accent);">works.any()</code>, product is <code style="color: var(--accent);">works.all()</code>"</em></p>
+                <p style="font-size: var(--small-size); color: var(--text-secondary); margin-top: var(--element-gap);">A demo only needs to work sometimes. A product must work reliably.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 13: WHY SOFTWARE FIRST?
+     ============================================ -->
+<section class="slide" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">1D: Why Code First?</div>
+                <h2>Why Does AI Start with Code?</h2>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: clamp(0.35rem, 0.8vh, 0.6rem); margin-top: var(--element-gap);">
+                <div class="step-row reveal">
+                    <div class="step-number">1</div>
+                    <div class="step-body">
+                        <h3>Training Data</h3>
+                        <p>All of GitHub, Stack Overflow &mdash; the most abundant, machine-readable corpus ever.</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number">2</div>
+                    <div class="step-body">
+                        <h3>Verifiability</h3>
+                        <p>Code runs or it doesn't. Tests pass or fail. Instant, objective feedback.</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number">3</div>
+                    <div class="step-body">
+                        <h3>Fast Feedback Loops</h3>
+                        <p>Write &rarr; run &rarr; see error &rarr; fix, in seconds. Most domains take days or weeks.</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number">4</div>
+                    <div class="step-body">
+                        <h3>Digital-Native</h3>
+                        <p>No physical world needed. Just read and write files.</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number">5</div>
+                    <div class="step-body">
+                        <h3>Structured Output</h3>
+                        <p>Programming languages have grammars. The output space is constrained.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 14: SOFTWARE ATE THE WORLD
+     ============================================ -->
+<section class="slide" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">The Punchline</div>
+                <h2>Most Knowledge Work Is <span class="gradient-text">Already Software</span></h2>
+            </div>
+            <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
+                <li>Spreadsheets are programming (VLOOKUP is a function, pivot tables are data pipelines)</li>
+                <li>Business workflows are software pipelines</li>
+                <li>Every knowledge worker's job is reading, thinking about, and producing <strong>digital files</strong></li>
+            </ul>
+            <div class="card reveal" style="margin-top: var(--element-gap);">
+                <div class="section-label">Karpathy's Software 3.0</div>
+                <div style="display: flex; flex-direction: column; gap: clamp(0.2rem, 0.5vh, 0.4rem);">
+                    <p style="font-size: var(--small-size); color: var(--text-secondary);"><strong style="color: var(--text-primary);">1.0:</strong> You write explicit code</p>
+                    <p style="font-size: var(--small-size); color: var(--text-secondary);"><strong style="color: var(--text-primary);">2.0:</strong> You train neural networks on data</p>
+                    <p style="font-size: var(--small-size); color: var(--text-primary);"><strong class="gradient-text">3.0:</strong> You describe what you want in English</p>
+                </div>
+            </div>
+            <div class="callout reveal">
+                <p>If English is the programming language, <strong>the line between "coding" and "knowledge work" disappears.</strong></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 15: LIVE DEMO
+     ============================================ -->
+<section class="slide" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">1E: Quick Demo</div>
+                <h2>Watch the Agent Pattern</h2>
+            </div>
+            <div class="terminal-block reveal">
+                <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                </div>
+                <div class="terminal-body">
+                    <div><span class="prompt">$</span> cd ~/Desktop/demo && claude</div>
+                    <div style="margin-top: 0.5em;"><span class="prompt">claude&gt;</span> Create a beautiful HTML page that shows a dashboard with 3 charts showing fake quarterly sales data, with a dark theme</div>
+                    <div class="output" style="margin-top: 0.5em;">I'll create that dashboard for you...</div>
+                </div>
+            </div>
+            <div class="callout reveal">
+                <p><strong>What just happened in agent terms:</strong> It read the goal, planned the approach, wrote code, created a file &mdash; tools in a loop toward a goal. Same three properties from 1B.</p>
+            </div>
+            <div class="card-sm reveal" style="text-align: center;">
+                <p style="font-size: var(--small-size); color: var(--text-secondary);">The interaction: you <strong style="color: var(--text-primary);">describe</strong>, it <strong style="color: var(--text-primary);">does</strong>, you <strong style="color: var(--text-primary);">see the result</strong>, you <strong style="color: var(--text-primary);">iterate</strong>.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 16: WHERE THINGS ARE GOING
+     ============================================ -->
+<section class="slide" data-section="story">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">1F: Looking Ahead</div>
+                <h2>Where Things Are Going</h2>
+            </div>
+            <ul class="bullet-list reveal" style="margin-top: var(--element-gap);">
+                <li>We're early. The tools are rough and the patterns are still being figured out.</li>
+                <li>But the trajectory is clear and things are moving fast.</li>
+                <li>Getting comfortable with this now is like learning to use a spreadsheet in 1985 &mdash; the specific tool doesn't matter as much as the <strong>intuition you build</strong>.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 17: PART 2 SECTION BREAK
+     ============================================ -->
+<section class="slide centered" data-section="exercise">
+    <div class="grid-bg"></div>
+    <div class="glow glow-orange" style="top: 30%; left: 50%; transform: translateX(-50%);"></div>
+    <div class="slide-content centered">
+        <div class="max-w-narrow" style="display: flex; flex-direction: column; align-items: center; gap: var(--content-gap);">
+            <div class="badge badge-dot reveal">Hands-On</div>
+            <h1 class="reveal">The <span class="gradient-text">Exercise</span></h1>
+            <p class="reveal" style="font-size: var(--body-size); color: var(--text-secondary); max-width: 450px; line-height: 1.5;">A non-coding business task done through Claude Code &mdash; proving the techniques transfer from coding to everything</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 18: SETUP + DATASET
+     ============================================ -->
+<section class="slide" data-section="exercise">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">Setup</div>
+                <h2>The Dataset</h2>
+            </div>
+            <div class="terminal-block reveal">
+                <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                </div>
+                <div class="terminal-body">
+                    <div><span class="prompt">$</span> cd ~/Desktop/tutorial</div>
+                    <div><span class="prompt">$</span> claude</div>
+                    <div class="output">Starting Claude Code...</div>
+                </div>
+            </div>
+            <div class="two-col reveal" style="margin-top: var(--element-gap);">
+                <div class="card-sm">
+                    <h3 style="color: var(--text-secondary);">What's in the CSV</h3>
+                    <p>~500 rows of simulated quarterly sales data: regions, products, sales reps, revenue, dates</p>
+                </div>
+                <div class="card-sm">
+                    <h3 style="color: var(--accent);">Why This Task</h3>
+                    <p>It's a business task, not a coding task &mdash; directly proves the "techniques transfer" point</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 19: PHASE 1 - EXPLORATION
+     ============================================ -->
+<section class="slide" data-section="exercise">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">Phase 1: Exploration (~10 min)</div>
+                <h2>Read & Summarize</h2>
+            </div>
+            <div class="terminal-block reveal">
+                <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                </div>
+                <div class="terminal-body">
+                    <div><span class="prompt">claude&gt;</span> Read and summarize this dataset. What columns are there? How many rows? Any data quality issues?</div>
+                </div>
+            </div>
+            <div class="callout reveal">
+                <p><strong>Key observation:</strong> The agent reads the file, decides what analysis to run, writes and executes code to inspect the data, and reports back. You told it <em>what you wanted to know</em>, not <em>how</em>.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 20: PHASE 2 - ANALYSIS
+     ============================================ -->
+<section class="slide" data-section="exercise">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">Phase 2: Analysis (~15 min)</div>
+                <h2>Ask Business Questions</h2>
+            </div>
+            <p class="reveal" style="font-size: var(--body-size); color: var(--text-secondary);">Try prompts like:</p>
+            <div class="card-grid reveal">
+                <div class="card-sm">
+                    <p>"Which region had the highest revenue growth quarter over quarter?"</p>
+                </div>
+                <div class="card-sm">
+                    <p>"Who are the top 5 sales reps by total revenue?"</p>
+                </div>
+                <div class="card-sm">
+                    <p>"Are there any seasonal patterns in the data?"</p>
+                </div>
+            </div>
+            <div class="callout reveal">
+                <p><strong>Watch for the loop:</strong> It writes Python code, runs it, sometimes hits an error, fixes the error, and tries again. This is the core agent behavior.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 21: PHASE 3 - VISUALIZATION
+     ============================================ -->
+<section class="slide" data-section="exercise">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">Phase 3: Visualization (~10 min)</div>
+                <h2>Create Charts & Reports</h2>
+            </div>
+            <div class="terminal-block reveal">
+                <div class="terminal-header">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                </div>
+                <div class="terminal-body">
+                    <div><span class="prompt">claude&gt;</span> Create a chart showing revenue by region over time</div>
+                    <div style="margin-top: 0.4em;"><span class="prompt">claude&gt;</span> Make a presentation-ready summary with the top 3 insights</div>
+                </div>
+            </div>
+            <p class="reveal" style="font-size: var(--body-size); color: var(--text-secondary);">Then iterate: "Make the chart colors match our brand" / "Add a trend line"</p>
+            <div class="callout reveal">
+                <p><strong>Autonomy slider in action:</strong> You're at Level 4 (supervised agent). It's doing multi-step work, but you're reviewing and steering.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 22: PHASE 4 - FREE EXPLORATION
+     ============================================ -->
+<section class="slide" data-section="exercise">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">Phase 4: Go Wild (~15 min)</div>
+                <h2>Go Wild</h2>
+            </div>
+            <div class="card-grid reveal-scale" style="margin-top: var(--element-gap);">
+                <div class="card-sm">
+                    <h3>Your Own Data</h3>
+                    <p>Bring a spreadsheet or document from your own work</p>
+                </div>
+                <div class="card-sm">
+                    <h3>Creative Requests</h3>
+                    <p>"Write a memo summarizing these findings for my boss"</p>
+                </div>
+                <div class="card-sm">
+                    <h3>Push Boundaries</h3>
+                    <p>"What would you recommend we do based on this data?"</p>
+                </div>
+            </div>
+            <div class="callout reveal">
+                <p><strong>If the agent gets stuck in a loop:</strong> Great teaching moment! "This is why we're at Level 4, not Level 5."</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 23: DEBRIEF
+     ============================================ -->
+<section class="slide centered" data-section="exercise">
+    <div class="grid-bg"></div>
+    <div class="glow glow-gold" style="top: 30%; left: 50%; transform: translateX(-50%);"></div>
+    <div class="slide-content centered">
+        <div class="max-w-narrow" style="display: flex; flex-direction: column; align-items: center; gap: var(--content-gap);">
+            <div class="badge reveal">Debrief</div>
+            <h2 class="reveal">Quick Round-the-Table</h2>
+            <ul class="bullet-list reveal" style="text-align: left; max-width: 450px;">
+                <li>What <strong>surprised</strong> you?</li>
+                <li>What worked <strong>better than expected?</strong> What didn't?</li>
+                <li>Did it feel like "programming"?</li>
+            </ul>
+            <div class="card-sm reveal" style="text-align: center; margin-top: var(--element-gap);">
+                <p style="font-size: var(--small-size); color: var(--text-secondary);">Connect back to Software 3.0 &mdash; you just "programmed" by describing what you wanted in English.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 24: PART 3 SECTION BREAK
+     ============================================ -->
+<section class="slide centered" data-section="wrapup">
+    <div class="grid-bg"></div>
+    <div class="glow glow-orange" style="top: 30%; left: 50%; transform: translateX(-50%);"></div>
+    <div class="slide-content centered">
+        <div class="max-w-narrow" style="display: flex; flex-direction: column; align-items: center; gap: var(--content-gap);">
+            <div class="badge reveal">Part 3</div>
+            <h1 class="reveal"><span class="gradient-text">Wrap-Up</span></h1>
+            <p class="reveal" style="font-size: var(--body-size); color: var(--text-secondary);">Reflection, discussion, and next steps</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 25: REFLECTION PROMPTS
+     ============================================ -->
+<section class="slide" data-section="wrapup">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">Discussion</div>
+                <h2>Reflection Prompts</h2>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: clamp(0.5rem, 1.2vh, 0.9rem); margin-top: var(--element-gap);">
+                <div class="step-row reveal">
+                    <div class="step-number">1</div>
+                    <div class="step-body">
+                        <h3>"What in your work is secretly software?"</h3>
+                        <p>Which of your tasks are really "read files &rarr; think &rarr; produce files"? Those can be given to an agent.</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number">2</div>
+                    <div class="step-body">
+                        <h3>"Where on the slider would you want AI?"</h3>
+                        <p>Not everything needs Level 5. Some tasks you want to stay involved in.</p>
+                    </div>
+                </div>
+                <div class="step-row reveal">
+                    <div class="step-number">3</div>
+                    <div class="step-body">
+                        <h3>"What would you try next?"</h3>
+                        <p>Concrete next steps you can take tomorrow.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 26: RESOURCES
+     ============================================ -->
+<section class="slide" data-section="wrapup">
+    <div class="grid-bg"></div>
+    <div class="slide-content">
+        <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
+            <div class="reveal">
+                <div class="section-label">Keep Going</div>
+                <h2>Resources</h2>
+            </div>
+            <div class="card-grid reveal-scale" style="margin-top: var(--element-gap);">
+                <div class="card-sm">
+                    <h3 style="color: var(--accent);">Claude Code Docs</h3>
+                    <p>Installation, setup, and official documentation at code.claude.com</p>
+                </div>
+                <div class="card-sm">
+                    <h3 style="color: var(--accent);">Key Concepts</h3>
+                    <p>Search for: "AI agents," "agentic workflows," "vibe coding"</p>
+                </div>
+                <div class="card-sm">
+                    <h3 style="color: var(--accent);">Stay Current</h3>
+                    <p>Follow communities and creators covering the agent ecosystem</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================
+     SLIDE 27: CLOSING FRAME
+     ============================================ -->
+<section class="slide centered" data-section="wrapup">
+    <div class="grid-bg"></div>
+    <div class="glow glow-orange" style="top: 25%; left: 50%; transform: translateX(-50%);"></div>
+    <div class="glow glow-gold" style="bottom: 20%; left: 40%;"></div>
+    <div class="slide-content centered">
+        <div class="max-w-narrow" style="display: flex; flex-direction: column; align-items: center; gap: var(--content-gap);">
+            <h2 class="reveal" style="font-size: var(--h2-size);">The tools will keep changing.</h2>
+            <h1 class="reveal">The skill is learning to <span class="gradient-text">collaborate with AI.</span></h1>
+            <p class="reveal" style="font-size: var(--body-size); color: var(--text-secondary); max-width: 450px; line-height: 1.6;">How to describe what you want. How to evaluate what you get back. How to iterate. That transfers across everything.</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===========================================
+     JAVASCRIPT: Presentation Controller
+     =========================================== -->
+<script>
+    class SlidePresentation {
+        constructor() {
+            this.slides = document.querySelectorAll('.slide');
+            this.currentSlide = 0;
+            this.totalSlides = this.slides.length;
+            this.isScrolling = false;
+            this.scrollTimeout = null;
+
+            this.init();
+        }
+
+        init() {
+            this.createNavDots();
+            this.setupIntersectionObserver();
+            this.setupKeyboardNav();
+            this.setupWheelNav();
+            this.setupTouchNav();
+            this.updateProgress();
+
+            setTimeout(() => {
+                const hint = document.getElementById('keyboardHint');
+                if (hint) hint.style.opacity = '0';
+            }, 5000);
+        }
+
+        createNavDots() {
+            const container = document.getElementById('navDots');
+            if (!container) return;
+
+            this.slides.forEach((_, i) => {
+                const dot = document.createElement('button');
+                dot.classList.add('nav-dot');
+                if (i === 0) dot.classList.add('active');
+                dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+                dot.addEventListener('click', () => this.goToSlide(i));
+                container.appendChild(dot);
+            });
+
+            this.dots = container.querySelectorAll('.nav-dot');
+        }
+
+        setupIntersectionObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        const index = Array.from(this.slides).indexOf(entry.target);
+                        this.currentSlide = index;
+                        this.updateActiveDot(index);
+                        this.updateProgress();
+
+                        const hint = document.getElementById('keyboardHint');
+                        if (hint && index > 0) hint.style.opacity = '0';
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            this.slides.forEach(slide => observer.observe(slide));
+        }
+
+        setupKeyboardNav() {
+            document.addEventListener('keydown', (e) => {
+                switch(e.key) {
+                    case 'ArrowDown':
+                    case 'ArrowRight':
+                    case ' ':
+                    case 'PageDown':
+                        e.preventDefault();
+                        this.nextSlide();
+                        break;
+                    case 'ArrowUp':
+                    case 'ArrowLeft':
+                    case 'PageUp':
+                        e.preventDefault();
+                        this.prevSlide();
+                        break;
+                    case 'Home':
+                        e.preventDefault();
+                        this.goToSlide(0);
+                        break;
+                    case 'End':
+                        e.preventDefault();
+                        this.goToSlide(this.totalSlides - 1);
+                        break;
+                }
+            });
+        }
+
+        setupWheelNav() {
+            document.addEventListener('wheel', (e) => {
+                if (this.isScrolling) return;
+                this.isScrolling = true;
+
+                if (e.deltaY > 0) this.nextSlide();
+                else this.prevSlide();
+
+                clearTimeout(this.scrollTimeout);
+                this.scrollTimeout = setTimeout(() => {
+                    this.isScrolling = false;
+                }, 800);
+            }, { passive: true });
+        }
+
+        setupTouchNav() {
+            let touchStartY = 0;
+
+            document.addEventListener('touchstart', (e) => {
+                touchStartY = e.changedTouches[0].screenY;
+            }, { passive: true });
+
+            document.addEventListener('touchend', (e) => {
+                const diff = touchStartY - e.changedTouches[0].screenY;
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) this.nextSlide();
+                    else this.prevSlide();
+                }
+            }, { passive: true });
+        }
+
+        nextSlide() {
+            if (this.currentSlide < this.totalSlides - 1)
+                this.goToSlide(this.currentSlide + 1);
+        }
+
+        prevSlide() {
+            if (this.currentSlide > 0)
+                this.goToSlide(this.currentSlide - 1);
+        }
+
+        goToSlide(index) {
+            this.slides[index].scrollIntoView({ behavior: 'smooth' });
+            this.currentSlide = index;
+            this.updateActiveDot(index);
+            this.updateProgress();
+        }
+
+        updateActiveDot(index) {
+            if (!this.dots) return;
+            this.dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        updateProgress() {
+            const bar = document.getElementById('progressBar');
+            if (!bar) return;
+            bar.style.width = `${((this.currentSlide + 1) / this.totalSlides) * 100}%`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        new SlidePresentation();
+    });
+</script>
+
+</body>
+</html>
