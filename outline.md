@@ -137,9 +137,14 @@ Quick forward look to close Part 1:
 
 ### Setup (~5 min)
 
-- Everyone opens their terminal
-- Verify Claude Code is installed and working
-- Navigate to the tutorial directory with the sample sales CSV
+Show the setup slide. Everyone should have done this beforehand, but help anyone who didn't.
+
+1. Claude account (Pro/Max sub or console.anthropic.com with $5 credits)
+2. Claude Code installed — [code.claude.com/docs/en/setup](https://code.claude.com/docs/en/setup)
+3. Clone the repo and cd into it:
+   - `git clone https://github.com/tangdrew/claude-code-workshop.git`
+   - `cd claude-code-workshop`
+4. Run `claude` and make sure it responds
 
 ### The Task: Sales Data Analysis (~50 min)
 

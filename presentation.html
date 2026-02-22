@@ -1178,36 +1178,44 @@
 
 
 <!-- ============================================
-     SLIDE 18: SETUP + DATASET
+     SLIDE 18: SETUP
      ============================================ -->
 <section class="slide" data-section="exercise">
     <div class="grid-bg"></div>
     <div class="slide-content">
         <div class="max-w-wide" style="display: flex; flex-direction: column; gap: var(--content-gap);">
             <div class="reveal">
-                <div class="section-label">Setup</div>
-                <h2>The Dataset</h2>
+                <div class="section-label">Before We Start</div>
+                <h2>Setup</h2>
             </div>
-            <div class="terminal-block reveal">
-                <div class="terminal-header">
-                    <span class="terminal-dot red"></span>
-                    <span class="terminal-dot yellow"></span>
-                    <span class="terminal-dot green"></span>
+            <div style="display: flex; flex-direction: column; gap: clamp(0.4rem, 1vh, 0.75rem); margin-top: var(--element-gap);">
+                <div class="step-row reveal">
+                    <div class="step-number">1</div>
+                    <div class="step-body">
+                        <h3>Claude account</h3>
+                        <p>Pro/Max sub at <strong style="color: var(--text-primary);">claude.ai</strong> &mdash; or &mdash; sign up at <strong style="color: var(--text-primary);">console.anthropic.com</strong> and add $5 credits</p>
+                    </div>
                 </div>
-                <div class="terminal-body">
-                    <div><span class="prompt">$</span> cd ~/Desktop/tutorial</div>
-                    <div><span class="prompt">$</span> claude</div>
-                    <div class="output">Starting Claude Code...</div>
+                <div class="step-row reveal">
+                    <div class="step-number">2</div>
+                    <div class="step-body">
+                        <h3>Install Claude Code</h3>
+                        <p><strong style="color: var(--text-primary);">code.claude.com/docs/en/setup</strong></p>
+                    </div>
                 </div>
-            </div>
-            <div class="two-col reveal" style="margin-top: var(--element-gap);">
-                <div class="card-sm">
-                    <h3 style="color: var(--text-secondary);">What's in the CSV</h3>
-                    <p>~500 rows of simulated quarterly sales data: regions, products, sales reps, revenue, dates</p>
+                <div class="step-row reveal">
+                    <div class="step-number">3</div>
+                    <div class="step-body">
+                        <h3>Clone the workshop repo</h3>
+                        <p style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: var(--small-size); color: var(--accent);">git clone https://github.com/tangdrew/claude-code-workshop.git</p>
+                        <p style="font-family: 'SF Mono', 'Fira Code', monospace; font-size: var(--small-size); color: var(--accent); margin-top: 2px;">cd claude-code-workshop</p>
+                    </div>
                 </div>
-                <div class="card-sm">
-                    <h3 style="color: var(--accent);">Why This Task</h3>
-                    <p>It's a business task, not a coding task &mdash; directly proves the "techniques transfer" point</p>
+                <div class="step-row reveal">
+                    <div class="step-number">4</div>
+                    <div class="step-body">
+                        <h3>Run <code style="background: rgba(255,107,53,0.1); border-color: var(--border-accent); color: var(--accent); font-size: inherit; padding: 1px 6px;">claude</code> and make sure it responds</h3>
+                    </div>
                 </div>
             </div>
         </div>
